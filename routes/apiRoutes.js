@@ -1,33 +1,19 @@
 const fs = require("fs");
-const { v4: uuidv4 } = require("uuid");
+const NotesStorage = require("../src/notesStorage");
 
 module.exports = (app) => {
     app.get("/api/notes", (req, res) => {
-        fs.readFile("./db/db.json", "utf8", (err, data) => {
-            res.json(JSON.parse(data));
-        });
+        res.json(new NotesStorage().getAll());
     });
 
     app.post("/api/notes", (req, res) => {
-        fs.readFile("./db/db.json", "utf8", (err, data) => {
-            let notes = JSON.parse(data);
-            const note = req.body;
-            note.id = uuidv4();
-            notes.push(note);
-            fs.writeFile("./db/db.json", JSON.stringify(notes, 0, 2), (err) => {
-                err ? res.json("Error") : res.json({});
-            });
-        });
+        const note = req.body;
+        res.json(new NotesStorage().add(note));
     });
 
     app.delete("/api/notes/:id", (req, res) => {
-        fs.readFile("./db/db.json", "utf8", (err, data) => {
-            let notes = JSON.parse(data);
-            const id = req.params.id;
-            notes = notes.filter(el => el.id !== id);
-            fs.writeFile("./db/db.json", JSON.stringify(notes, 0, 2), (err) => {
-                err ? res.json("Error") : res.json({});
-            });
-        });
+        const id = req.params.id;
+        new NotesStorage().delete(id);
+        res.json({});
     });
 };
